@@ -1,27 +1,71 @@
 """Analyst node — Claude Sonnet, recall-tuned (ANLY-01).
 
-Reads the full paste and flags credentials with reasoning. Tuned for recall, not
-precision — it is allowed to over-flag; the Judge is what enforces precision.
-Runs warmer than the Judge. Loads its system prompt from prompts/analyst_system.md.
+First of the two LLM stages. Reads the paste and flags anything credential- or
+identifier-shaped (recall — see prompts/analyst_system.md). Writes analyst_flagged (bool)
+and analyst_reasoning (str). Precision is the Judge's job, not the Analyst's.
 """
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
+import anthropic
+from langsmith.wrappers import wrap_anthropic
+from pydantic import BaseModel, ValidationError
+
 from state import LeakGuardState
 
 MODEL = "claude-sonnet-4-6"
+TEMPERATURE = 0.3          # warmer than the Judge — tuned for recall (ANLY-01)
+MAX_TOKENS = 1024
+PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "analyst_system.md"
+
+
+class AnalystOutput(BaseModel):
+    analyst_flagged: bool
+    analyst_reasoning: str
+
+
+def _strip_json(text: str) -> str:
+    """Return the JSON object from a model reply, tolerating ```json fences / stray prose."""
+    text = text.strip()
+    start, end = text.find("{"), text.rfind("}")
+    return text[start:end + 1] if start != -1 and end != -1 else text
+
+
+def _call_claude(system_prompt: str, user_msg: str) -> str:
+    """Single Claude call; returns raw text. Isolated so tests can monkeypatch it."""
+    client = wrap_anthropic(anthropic.Anthropic())
+    resp = client.messages.create(
+        model=MODEL,
+        max_tokens=MAX_TOKENS,
+        temperature=TEMPERATURE,
+        system=system_prompt,
+        messages=[{"role": "user", "content": user_msg}],
+    )
+    return resp.content[0].text
 
 
 def analyst_node(state: LeakGuardState) -> LeakGuardState:
-    """Send paste + regex hits to Claude; store recall-tuned reasoning in state.
+    """Recall pass: flag anything credential-shaped; write analyst_flagged + analyst_reasoning."""
+    content = state.get("raw_content") or ""
+    hits = state.get("regex_hits") or []
+    system_prompt = PROMPT_PATH.read_text(encoding="utf-8")
+    user_msg = (
+        f"Regex triage flagged these spans:\n{json.dumps(hits, indent=2)}\n\n"
+        f"Full paste content:\n{content}"
+    )
 
-    TODO:
-      - load prompts/analyst_system.md
-      - call Anthropic SDK (warm temperature), handle rate limits w/ backoff
-      - write analyst_output to state and to the audit log (ANLY-05)
-    """
-    # MOCK (Day-2 graph wiring): real Claude recall call lands in step 5.
-    print("[analyst] (mock) recall pass over regex_hits")
-    state["analyst_flagged"] = bool(state.get("regex_hits"))
-    state["analyst_reasoning"] = "MOCK analyst output — real Claude Sonnet call lands in step 5."
+    raw = _call_claude(system_prompt, user_msg)
+    try:
+        parsed = AnalystOutput.model_validate_json(_strip_json(raw))
+        state["analyst_flagged"] = parsed.analyst_flagged
+        state["analyst_reasoning"] = parsed.analyst_reasoning
+    except (ValidationError, ValueError) as exc:
+        # Recall-safe: never drop a possible leak on a parse failure — flag, and flag the failure.
+        state["analyst_flagged"] = True
+        state["analyst_reasoning"] = f"analyst output unparseable ({type(exc).__name__}); flagged by default"
+
+    print(f"[analyst] flagged={state['analyst_flagged']}")
     return state
