@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- SYNTHETIC DEMO FIXTURE. This is the "false positive" decoy (Flow 3): a tutorial that
+     uses AWS's well-known documentation placeholder key. Triage flags it, the Analyst
+     flags it (recall mode), but the Judge should reject it (~3/10) as tutorial content. -->
+<html lang="en">
+<head><title>How to set up the AWS CLI</title></head>
+<body>
+<pre>
+# Configuring credentials
+
+Run `aws configure` and paste your keys when prompted. For example:
+
+AWS Access Key ID: AKIAIOSFODNN7EXAMPLE
+AWS Secret Access Key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+Default region name: us-west-2
+
+These are placeholder values from the AWS docs — replace them with your own.
+Never commit real keys to version control.
+</pre>
+</body>
+</html>

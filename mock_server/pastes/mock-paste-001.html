@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- SYNTHETIC DEMO FIXTURE. All values below are fake, generated for LeakGuard's own
+     test funnel. This is the "verified leak" decoy (Flow 1): panicked-debug context,
+     real-looking entropy, internal subdomain. Should score high and fire an alert. -->
+<html lang="en">
+<head><title>help - prod db connection refused??</title></head>
+<body>
+<pre>
+ugh cannot connect to prod, on call and stuck. here is my .env can someone see whats wrong
+
+DB_HOST=db-prod-01.acme.com
+DB_USER=svc_payments
+DB_PASS=Xy7$kQ9mLp2wRtVz
+AWS_ACCESS_KEY_ID=AKIAZ7K9QW2MX4P1L3VN
+AWS_SECRET_ACCESS_KEY=aB3xT9pL0qWmEr7yKd2HfGz8Nc1VuJ4sQ6tXw5R
+AWS_REGION=us-east-1
+STRIPE_KEY=sk_live_51Hb9xQ2eZvKfL8mNpRtYwUiOaSdFgHjKlZxCvBnM
+
+connection string i am using:
+postgres://svc_payments:Xy7$kQ9mLp2wRtVz@db-prod-01.acme.com:5432/payments
+</pre>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# Watchlist for the Discovery node (DISC-04). Hot-reloads on file change.
+# One configured identity for v1 (an org or an individual builder).
+# 10-20 variants is the v1 scale assumption.
+
+company_names:
+  - acmecorp
+  - "Acme Corporation"
+
+internal_subdomains:
+  - acmecorp.internal
+  - db-prod-01.acmecorp.internal
+
+product_codenames:
+  - bluefin
+  - project-northstar
+
+# Personal identifiers (v0.2) — the solo-builder self-monitoring use case.
+# Placeholders only — this file is committed. Put your REAL identifiers in
+# keywords.local.yaml (gitignored) so you never publish them in the repo.
+personal_identifiers:
+  - your-email@example.com
+  - linkedin.com/in/your-handle
+
+# Paste domains the dorks target (mirrors PASTE_DOMAINS in nodes/discovery.py).
+paste_domains:
+  - pastebin.com
+  - paste.ee
+  - ghostbin.com
+  - dpaste.org

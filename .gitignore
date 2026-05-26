@@ -1,0 +1,11 @@
+.env
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+audit_log.jsonl
+eval_results.json
+.secrets.baseline
+docs/day*_plan.md
+keywords.local.yaml
+.pytest_cache/
