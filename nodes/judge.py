@@ -23,4 +23,12 @@ def judge_node(state: LeakGuardState) -> LeakGuardState:
       - malformed JSON -> retry once stricter, else log Judge failure + skip alert
       - set is_verified = (total_score >= ALERT_THRESHOLD); write both to audit log
     """
-    raise NotImplementedError
+    # MOCK (Day-2 graph wiring): real three-axis scoring lands in step 6.
+    print("[judge] (mock) scoring -> verified")
+    state["judge_verdict"] = {
+        "total_score": 9,
+        "is_verified": True,
+        "audit_reasoning": "MOCK verdict — real Claude scoring lands in step 6.",
+        "analyst_feedback": "",
+    }
+    return state

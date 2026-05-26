@@ -20,4 +20,8 @@ def analyst_node(state: LeakGuardState) -> LeakGuardState:
       - call Anthropic SDK (warm temperature), handle rate limits w/ backoff
       - write analyst_output to state and to the audit log (ANLY-05)
     """
-    raise NotImplementedError
+    # MOCK (Day-2 graph wiring): real Claude recall call lands in step 5.
+    print("[analyst] (mock) recall pass over regex_hits")
+    state["analyst_flagged"] = bool(state.get("regex_hits"))
+    state["analyst_reasoning"] = "MOCK analyst output — real Claude Sonnet call lands in step 5."
+    return state

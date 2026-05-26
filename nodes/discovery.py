@@ -53,4 +53,7 @@ def discovery_node(state: LeakGuardState) -> LeakGuardState:
       - drop URLs already in the processed-URLs store (DISC-03)
       - respect the Bright Data budget guardrail at 80% of cap (NFR-06)
     """
-    raise NotImplementedError
+    # MOCK (Day-2 graph wiring): real SERP discovery via serp_search() is deferred to the
+    # Bright Data integration; today the graph runs against seeded mock paste URLs.
+    print(f"[discovery] (mock) passthrough; seeded url={state.get('url')!r}")
+    return state

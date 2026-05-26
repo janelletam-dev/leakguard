@@ -24,4 +24,7 @@ def alert_node(state: LeakGuardState) -> LeakGuardState:
       - build payload: source URL, redacted snippet, score, audit reasoning, timestamp
       - POST to SLACK_WEBHOOK_URL; non-200 -> queue + retry every 30s up to 10min (ALRT-04)
     """
-    raise NotImplementedError
+    # MOCK (Day-2 graph wiring): real Slack webhook POST lands in step 7.
+    print("[alert] (mock) would POST redacted alert to Slack")
+    state["decision"] = "verified"
+    return state

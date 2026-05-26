@@ -41,3 +41,8 @@ class LeakGuardState(TypedDict, total=False):
 
     # --- Bookkeeping ---
     meta: dict[str, Any]           # cost tracking, retry counts, dedupe hashes, etc.
+    
+    #optional
+    is_triaged_clean: Optional[bool]
+    analyst_flagged: Optional[bool]
+    analyst_reasoning: Optional[str]
