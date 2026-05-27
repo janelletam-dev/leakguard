@@ -1,17 +1,23 @@
 """Alert node — Slack incoming webhook (ALRT-01..04).
 
-Fires only for verified leaks (routed here by the conditional edge, ORCH-04). Redacts the
-credential before sending — first 4 + last 4 chars only (ALRT-03 / NFR-04).
+Fires only for verified leaks (routed here by the conditional edge, ORCH-04). Redacts every
+credential before sending — both the headline field and any secret the Judge happened to quote
+in its reasoning (NFR-04 / ALRT-03). Defense in depth: the Judge prompt is told not to quote
+secrets, and this node scrubs them anyway in case the prompt fails (prompts are not contracts).
 """
 
 from __future__ import annotations
 
 import os
+import re
 from datetime import datetime, timezone
 
 import requests
 
 from state import LeakGuardState
+
+# Secret-ish run: alnum plus the punctuation common in keys / passwords / connection strings.
+_SECRETISH = re.compile(r"[A-Za-z0-9$/+_=.\-]{8,}")
 
 
 def redact(secret: str) -> str:
@@ -19,6 +25,27 @@ def redact(secret: str) -> str:
     if len(secret) <= 8:
         return "*" * len(secret)
     return f"{secret[:4]}{'*' * (len(secret) - 8)}{secret[-4:]}"
+
+
+def _high_entropy(token: str) -> bool:
+    """Mixed case + at least one digit — the shape of a real secret, not a normal word."""
+    return (any(c.islower() for c in token)
+            and any(c.isupper() for c in token)
+            and any(c.isdigit() for c in token))
+
+
+def scrub_secrets(text: str, state: LeakGuardState) -> str:
+    """Redact any real secret that slipped into outgoing text (NFR-04).
+
+    Covers (a) every regex-triage match, and (b) any 8+ char high-entropy token that appears in
+    both the text and the raw paste — catching secrets triage missed but the Judge quoted.
+    """
+    raw = state.get("raw_content") or ""
+    secrets = {h["match"] for h in (state.get("regex_hits") or []) if h.get("match")}
+    secrets |= {tok for tok in _SECRETISH.findall(text) if _high_entropy(tok) and tok in raw}
+    for secret in sorted(secrets, key=len, reverse=True):  # longest first, avoids partial overlaps
+        text = text.replace(secret, redact(secret))
+    return text
 
 
 def build_payload(state: LeakGuardState) -> dict:
@@ -36,7 +63,7 @@ def build_payload(state: LeakGuardState) -> dict:
         f"*Reasoning:* {verdict.get('audit_reasoning', '')}\n"
         f"*Detected:* {ts}"
     )
-    return {"text": text}
+    return {"text": scrub_secrets(text, state)}  # final defense-in-depth pass (NFR-04)
 
 
 def alert_node(state: LeakGuardState) -> LeakGuardState:

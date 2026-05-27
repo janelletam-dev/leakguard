@@ -25,6 +25,11 @@ Return **strict JSON only**, no prose around it:
 }
 ```
 
+**Never reproduce a secret verbatim** anywhere in your output — refer to each credential by
+type and location ("the AWS key in the .env block", "the DB password"). Your `audit_reasoning`
+is forwarded into a Slack alert, so any quoted secret would leak the very credential we exist
+to protect.
+
 Each axis must be an integer within its stated range. The pipeline sums the three axes into a
 total (0-10) and verifies the leak only when the total is **>= 8** — so score honestly per
 axis. When in doubt, score lower: a false alert erodes trust more than a missed borderline

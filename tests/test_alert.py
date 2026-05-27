@@ -54,3 +54,20 @@ def test_alert_node_handles_post_failure(monkeypatch):
     alert_node(state)
     assert state["decision"] == "alert-failed"
     assert "slack-post-failed" in state["error"]
+
+
+def test_reasoning_secrets_are_scrubbed():
+    # The Judge quoted two secrets verbatim: one is a regex hit, one (the DB password) is not.
+    state = {
+        "url": "http://localhost:8080/paste/001",
+        "raw_content": "AWS_ACCESS_KEY_ID=AKIAZ7K9QW2MX4P1L3VN\nDB_PASS=Xy7$kQ9mLp2wRtVz",
+        "regex_hits": [{"pattern": "aws_access_key", "match": "AKIAZ7K9QW2MX4P1L3VN", "span": [0, 20]}],
+        "judge_verdict": {
+            "total_score": 10,
+            "audit_reasoning": "AWS key 'AKIAZ7K9QW2MX4P1L3VN' and DB password 'Xy7$kQ9mLp2wRtVz' are both high-entropy.",
+        },
+    }
+    text = build_payload(state)["text"]
+    assert "AKIAZ7K9QW2MX4P1L3VN" not in text   # regex-hit secret scrubbed
+    assert "Xy7$kQ9mLp2wRtVz" not in text       # high-entropy secret triage missed — also scrubbed
+    assert "AKIA" in text and "Xy7$" in text     # redacted forms still present
