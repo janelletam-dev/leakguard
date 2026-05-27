@@ -1,11 +1,10 @@
 """LangGraph state machine wiring (ORCH-01).
 
-Pipeline:
-    discovery -> extraction -> triage -> (clean? exit)
-              -> analyst -> judge -> (verified? alert : exit)
+Pipeline (every path ends at `audit`, which writes one redacted record per paste, NFR-05):
 
-Conditional after triage (TRGE-02): if is_triaged_clean, end; else proceed to analyst.
-Conditional after judge (ORCH-04): if the verdict is_verified, route to alert; else end.
+    discovery -> extraction -> triage --clean----------------------> audit -> END
+                                      \\--hits--> analyst -> judge --verified--> alert -> audit -> END
+                                                                  \\--rejected----------> audit -> END
 """
 
 from __future__ import annotations
@@ -15,6 +14,7 @@ import os
 from dotenv import load_dotenv
 from langgraph.graph import END, StateGraph
 
+from audit.writer import audit_node
 from nodes.alert import alert_node
 from nodes.analyst import analyst_node
 from nodes.discovery import discovery_node
@@ -44,16 +44,16 @@ def validate_env() -> None:
 
 
 def route_after_triage(state: LeakGuardState) -> str:
-    """Clean pastes exit; pastes with regex hits continue to the Analyst (TRGE-02)."""
+    """Clean pastes go straight to audit (scanned-clean); pastes with hits go to the Analyst (TRGE-02)."""
     if state.get("is_triaged_clean") is True:
-        return "end"
+        return "audit"
     return "analyst"
 
 
 def route_after_judge(state: LeakGuardState) -> str:
-    """Verified leaks route to the alert node; everything else ends silently (ORCH-04)."""
+    """Verified leaks route to alert; everything else goes straight to audit (ORCH-04)."""
     verdict = state.get("judge_verdict") or {}
-    return "alert" if verdict.get("is_verified") else "end"
+    return "alert" if verdict.get("is_verified") else "audit"
 
 
 def build_graph():
@@ -66,14 +66,16 @@ def build_graph():
     graph.add_node("analyst", analyst_node)
     graph.add_node("judge", judge_node)
     graph.add_node("alert", alert_node)
+    graph.add_node("audit", audit_node)
 
     graph.set_entry_point("discovery")
     graph.add_edge("discovery", "extraction")
     graph.add_edge("extraction", "triage")
-    graph.add_conditional_edges("triage", route_after_triage, {"analyst": "analyst", "end": END})
+    graph.add_conditional_edges("triage", route_after_triage, {"analyst": "analyst", "audit": "audit"})
     graph.add_edge("analyst", "judge")
-    graph.add_conditional_edges("judge", route_after_judge, {"alert": "alert", "end": END})
-    graph.add_edge("alert", END)
+    graph.add_conditional_edges("judge", route_after_judge, {"alert": "alert", "audit": "audit"})
+    graph.add_edge("alert", "audit")
+    graph.add_edge("audit", END)
 
     return graph.compile()
 
