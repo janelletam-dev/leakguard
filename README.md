@@ -65,6 +65,15 @@ streamlit run dashboard/app.py      # live dashboard
 > Google URL includes `brd_json=1` (see `nodes/discovery.py`). Rehearse against the
 > mock server, not live SERP, to protect the $250 credit cap.
 
+## Tracing & privacy
+
+LangSmith captures the **full prompt** sent to Claude — which for LeakGuard includes the raw
+paste content, secrets and all. Treat LangSmith as a log: `LANGSMITH_TRACING` is **off by
+default** and should be enabled **only** for runs against the synthetic fixtures (e.g. the
+demo). Never enable it against real paste data — that would ship live credentials to a
+third-party store, the exact exposure LeakGuard exists to catch. The env toggle is the real
+switch (it also disables LangGraph's node-state tracing); the per-node client wrap is a backstop.
+
 ## Status
 
 Pipeline runs **end-to-end**. Discovery (live SERP) is the only stub — demos run against the

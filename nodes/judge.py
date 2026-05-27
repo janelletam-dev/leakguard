@@ -8,6 +8,7 @@ a Judge failure and fails safe (is_verified=False, no alert).
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import anthropic
@@ -27,8 +28,8 @@ class JudgeScores(BaseModel):
     target_authenticity: int = Field(ge=0, le=3)
     secret_entropy: int = Field(ge=0, le=4)
     exposure_context: int = Field(ge=0, le=3)
-    audit_reasoning: str
-    analyst_feedback: str = ""
+    audit_reasoning: str = Field(max_length=2000)
+    analyst_feedback: str = Field(default="", max_length=500)
 
 
 def _strip_json(text: str) -> str:
@@ -40,7 +41,12 @@ def _strip_json(text: str) -> str:
 
 def _call_claude(system_prompt: str, user_msg: str) -> str:
     """Single Claude call; returns raw text. Isolated so tests can monkeypatch it."""
-    client = wrap_anthropic(anthropic.Anthropic())
+    base = anthropic.Anthropic()
+    # LangSmith stores the full prompt — which here includes raw paste content and any
+    # credentials in it. Trace only when explicitly enabled, and only against synthetic
+    # fixtures, never real paste data (NFR-04). LANGSMITH_TRACING=false is the real off-switch
+    # (it also stops LangGraph node-state tracing); this wrap is belt-and-suspenders.
+    client = wrap_anthropic(base) if os.environ.get("LANGSMITH_TRACING") == "true" else base
     resp = client.messages.create(
         model=MODEL,
         max_tokens=MAX_TOKENS,
@@ -54,9 +60,11 @@ def _call_claude(system_prompt: str, user_msg: str) -> str:
 def judge_node(state: LeakGuardState) -> LeakGuardState:
     """Score the candidate; populate state['judge_verdict'] with axes, total, and verdict."""
     system_prompt = PROMPT_PATH.read_text(encoding="utf-8")
+    # Content is wrapped in <paste> tags; the system prompt treats anything inside as data,
+    # not instructions (prompt-injection defense).
     user_msg = (
         f"Analyst findings:\n{state.get('analyst_reasoning') or '(none)'}\n\n"
-        f"Full paste content:\n{state.get('raw_content') or ''}"
+        f"<paste>\n{state.get('raw_content') or ''}\n</paste>"
     )
 
     scores: JudgeScores | None = None
@@ -71,7 +79,6 @@ def judge_node(state: LeakGuardState) -> LeakGuardState:
             scores = None
 
     if scores is None:
-        # Malformed twice — log and fail safe. Never fire an alert on a broken verdict.
         state["judge_verdict"] = {
             "total_score": 0,
             "is_verified": False,

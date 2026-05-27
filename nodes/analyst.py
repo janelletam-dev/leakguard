@@ -8,6 +8,7 @@ and analyst_reasoning (str). Precision is the Judge's job, not the Analyst's.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import anthropic
@@ -36,7 +37,12 @@ def _strip_json(text: str) -> str:
 
 def _call_claude(system_prompt: str, user_msg: str) -> str:
     """Single Claude call; returns raw text. Isolated so tests can monkeypatch it."""
-    client = wrap_anthropic(anthropic.Anthropic())
+    base = anthropic.Anthropic()
+    # LangSmith stores the full prompt — which here includes raw paste content and any
+    # credentials in it. Trace only when explicitly enabled, and only against synthetic
+    # fixtures, never real paste data (NFR-04). LANGSMITH_TRACING=false is the real off-switch
+    # (it also stops LangGraph node-state tracing); this wrap is belt-and-suspenders.
+    client = wrap_anthropic(base) if os.environ.get("LANGSMITH_TRACING") == "true" else base
     resp = client.messages.create(
         model=MODEL,
         max_tokens=MAX_TOKENS,
