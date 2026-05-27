@@ -4,7 +4,7 @@ Scores the 20 seeded fixtures through triage -> analyst -> judge and reports pre
 recall against tests/seeded_pastes/manifest.yaml. Reads fixtures directly (no discovery /
 extraction / Slack), so it exercises the *decision* path, not the network.
 
-Run (after `source .env`):  python tests/run_eval.py
+Run (after filling .env):  python tests/run_eval.py
 Cost: ~2 real Claude calls per fixture that passes triage. Does NOT post to Slack.
 """
 
@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 import yaml
+from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -39,6 +40,7 @@ def decide(content: str) -> dict:
 
 
 def main() -> int:
+    load_dotenv()
     seeds = yaml.safe_load((PASTES / "manifest.yaml").read_text())["seeds"]
     tp = fp = tn = fn = 0
     print(f"{'id':<9} {'expect':<7} {'got':<6} {'score':<6} {'stage':<13} result")

@@ -10,6 +10,9 @@ Conditional after judge (ORCH-04): if the verdict is_verified, route to alert; e
 
 from __future__ import annotations
 
+import os
+
+from dotenv import load_dotenv
 from langgraph.graph import END, StateGraph
 
 from nodes.alert import alert_node
@@ -19,6 +22,25 @@ from nodes.extraction import extraction_node
 from nodes.judge import judge_node
 from nodes.triage import triage_node
 from state import LeakGuardState
+
+REQUIRED_ENV = [
+    "ANTHROPIC_API_KEY", "BRIGHTDATA_API_KEY", "BRIGHTDATA_UNLOCKER_ZONE",
+    "BRIGHTDATA_SERP_ZONE", "SLACK_WEBHOOK_URL",
+]
+
+
+def validate_env() -> None:
+    """Fail fast with a clear message if a required key is missing (not mid-pipeline).
+
+    Called from the entry point, never at import, so tests and the eval runner can import
+    build_graph without every key present.
+    """
+    missing = [k for k in REQUIRED_ENV if not os.environ.get(k)]
+    if missing:
+        raise SystemExit(
+            f"Missing required env vars: {missing}\n"
+            "Copy .env.example to .env and fill them in (or `source .env`)."
+        )
 
 
 def route_after_triage(state: LeakGuardState) -> str:
@@ -57,6 +79,8 @@ def build_graph():
 
 
 if __name__ == "__main__":
+    load_dotenv()
+    validate_env()
     app = build_graph()
     final = app.invoke({"url": "http://localhost:8080/paste/001", "keywords": ["acme", "acme.com"]})
     print("decision:", final.get("decision"))
