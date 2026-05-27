@@ -290,8 +290,6 @@ leakguard/
 
 5. **Post-hackathon positioning.** Standalone product, feature acquisition target, or Bright Data Startup Program project. Decision depends on judges' reaction and whether the project gets fast-tracked.
 
-6. **Self-monitoring as the v2 wedge.** Solo AI builders monitoring their own identifiers (email, LinkedIn handle, project names) is a cleaner go-to-market than selling to enterprise SOC teams as a first move. The personal origin story already supports this. Worth committing to in the roadmap slide.
-
 ---
 
 ## 12. Pitch and Positioning
@@ -301,6 +299,10 @@ This section is not part of the technical spec. It holds the language and framin
 ### The thesis (one sentence)
 
 AI-assisted development creates exposure surfaces that legacy security tools were not built to watch, and LeakGuard is the monitor for the surfaces AI builders actually create.
+
+### Roadmap direction (decided)
+
+Self-monitoring for solo AI builders is the committed v2 wedge: builders watch their own identifiers (email, LinkedIn handle, project names) before we sell to enterprise SOC teams. The personal origin story supports it, and detection-at-scale (Bright Data) stays the enterprise layer the wedge funnels into. (Previously an open question — now a stated direction.)
 
 ### The category claim
 
