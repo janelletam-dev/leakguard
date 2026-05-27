@@ -7,4 +7,5 @@ audit_log.jsonl
 eval_results.json
 docs/day*_plan.md
 keywords.local.yaml
+identifiers.local
 .pytest_cache/
