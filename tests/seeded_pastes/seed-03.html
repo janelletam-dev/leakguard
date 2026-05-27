@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head><title>stripe webhook signature failing in prod</title></head>
+<body>
+<pre>
+webhook verification works in test mode but fails live. here's the handler:
+
+import stripe
+stripe.api_key = "sk_live_51Mx8KpHqLyjWDarjtT1zdp7dcRf8xK2mZ9vBnQ4eC39H"
+endpoint_secret = "whsec_8K2mNpQrStUvWxYz3a7bC4dRf9xL6mZ"
+
+event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+
+am i mixing up the keys? this is the live key from the harborline dashboard
+</pre>
+</body>
+</html>

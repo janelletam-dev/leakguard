@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><title>Security changelog - Q1 key rotation</title></head>
+<body>
+<pre>
+2026-02-14 - Rotated all production IAM keys as part of quarterly hygiene.
+
+The following access key has been DEACTIVATED and is no longer valid:
+  AKIA7Q2W9E4R5T6Y8U1O
+
+New keys were issued via the secrets manager and are not stored here. If you have automation
+still referencing the old key, update it - it will only return AccessDenied now.
+</pre>
+</body>
+</html>

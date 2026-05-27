@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><title>CI can't push tags - token issue?</title></head>
+<body>
+<pre>
+my github action keeps failing on the tag push step. i hardcoded the token to test and it still fails:
+
+git remote set-url origin https://x-access-token:ghp_R8kQ2xL9mZ4pW7nT1vY6bH3cJ5dF0aS8gE2@github.com/novapeak/release-bot.git
+git push origin --tags
+
+the token has repo + workflow scope. is it the url format thats wrong?
+</pre>
+</body>
+</html>

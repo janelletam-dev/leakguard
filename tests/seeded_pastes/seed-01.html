@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head><title>prod deploy broken - env vars not loading??</title></head>
+<body>
+<pre>
+guys staging works but prod is throwing auth errors everywhere. here's the prod env, what am i missing
+
+AWS_ACCESS_KEY_ID=AKIA4QH7ZX9W2KMP3NLT
+AWS_SECRET_ACCESS_KEY=v8Kx2pLqR9mNwT4yBdHf7sGzJc1eUa5XrQ6oPi3W
+AWS_DEFAULT_REGION=eu-west-1
+STRIPE_SECRET_KEY=sk_live_4eC39HqLyjWDarjtT1zdp7dcRf8xK2mZ
+DATABASE_URL=postgres://api_svc:Tz7%Kq2mWnR9@db-prod-01.meridiancore.net:5432/core
+
+it connects fine locally with these exact values so the creds are right
+</pre>
+</body>
+</html>

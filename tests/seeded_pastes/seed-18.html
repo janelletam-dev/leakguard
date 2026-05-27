@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><title>password_reset_email.html template</title></head>
+<body>
+<pre>
+Hi {{user_name}},
+
+We received a request to reset your password. Click below to set a new one:
+
+https://app.harborline.co/reset?token={{reset_token}}&api_key={{public_api_key}}
+
+This link expires in 30 minutes. If you didn't request this, you can ignore this email.
+</pre>
+</body>
+</html>

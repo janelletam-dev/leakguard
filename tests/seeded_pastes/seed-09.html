@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head><title>gcloud auth failing in cron job</title></head>
+<body>
+<pre>
+the nightly export cron cant auth to GCS. here is the service account json it loads:
+
+{
+  "type": "service_account",
+  "project_id": "fernwood-labs-prod",
+  "private_key_id": "9fk2mnpqrstuvwxyz3a7bc4drf9xl6mz",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDKq9mWp2xQ7nLt\n4ZRk9JcA1eUa5XrQ6oPi3Wv8Kx2pLqR9mNwT4yBdHf7sGz\n-----END PRIVATE KEY-----\n",
+  "client_email": "exporter@fernwood-labs-prod.iam.gserviceaccount.com",
+  "token_uri": "https://oauth2.googleapis.com/token"
+}
+
+the SA has storage.objectAdmin. it worked last week.
+</pre>
+</body>
+</html>

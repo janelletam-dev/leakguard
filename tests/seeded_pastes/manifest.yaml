@@ -1,0 +1,31 @@
+# Ground truth for the 20-paste seeded eval set (PRD section 10).
+# The paste files carry NO outcome hints — truth lives here only.
+# expect_alert = should a verified Slack alert fire for this paste?
+#   recall    = of the real leaks (expect_alert: true), how many alerted?
+#   precision = of the pastes that alerted, how many were real leaks?
+# Target: precision >= 80%, false-positive rate < 5%.
+
+seeds:
+  # --- real leaks (expect a verified alert) ---
+  - { id: seed-01, expect_alert: true,  kind: "AWS + Stripe-live + DB in panicked .env dump" }
+  - { id: seed-02, expect_alert: true,  kind: "GitHub PAT (ghp_) hardcoded in a CI help post" }
+  - { id: seed-03, expect_alert: true,  kind: "Stripe live secret key in a webhook handler" }
+  - { id: seed-04, expect_alert: true,  kind: "Slack bot token (xoxb-) + incoming webhook" }
+  - { id: seed-05, expect_alert: true,  kind: "Postgres password ONLY in a connection string (regex-gap trap)" }
+  - { id: seed-06, expect_alert: true,  kind: "OpenAI API key (sk-proj-) inline in a script" }
+  - { id: seed-07, expect_alert: true,  kind: "JWT access token with real-looking internal claims" }
+  - { id: seed-08, expect_alert: true,  kind: "RSA private key block pasted while debugging deploy" }
+  - { id: seed-09, expect_alert: true,  kind: "GCP service-account JSON with private_key" }
+  - { id: seed-10, expect_alert: true,  kind: "Twilio account SID + auth token in a secrets file" }
+
+  # --- decoys (should NOT alert: placeholder / test / template / masked / revoked) ---
+  - { id: seed-11, expect_alert: false, kind: "AWS docs placeholder AKIA...EXAMPLE in a tutorial" }
+  - { id: seed-12, expect_alert: false, kind: ".env.example with placeholder values" }
+  - { id: seed-13, expect_alert: false, kind: "Stripe TEST key (sk_test_) in quickstart docs" }
+  - { id: seed-14, expect_alert: false, kind: "jwt.io example token with documented sample payload" }
+  - { id: seed-15, expect_alert: false, kind: "README env setup with <YOUR_API_KEY> angle-bracket placeholders" }
+  - { id: seed-16, expect_alert: false, kind: "Obvious low-entropy AKIA sample in a forum answer" }
+  - { id: seed-17, expect_alert: false, kind: "GitHub Actions ${{ secrets.* }} references (no values)" }
+  - { id: seed-18, expect_alert: false, kind: "Password-reset email template with {{template}} vars" }
+  - { id: seed-19, expect_alert: false, kind: "Local-dev tutorial joke creds (changeme / hunter2)" }
+  - { id: seed-20, expect_alert: false, kind: "Changelog announcing a DEACTIVATED/revoked key" }

@@ -15,3 +15,10 @@ Patterns are intentionally left as-is until then.
 ## Eval-set notes (Day 3)
 
 - **Swap the watchlist domain for the seeded set.** `acme.com` is a recognised example/RFC domain, and the Judge correctly flags it as suspicious — which muddies the Target Authenticity axis during calibration. Use a realistic, ungoogleable fake corporate domain in the 20-paste eval set (e.g. `arrowstride.io`, `meridiancore.net`). Leave the **demo** fixtures on `acme.com` as-is: "the Judge verified the leak 9/10 even while flagging the domain as suspicious" is the stronger story.
+
+- **Recall gaps surfaced by the seeded-set triage dry-run (free, pre-Judge).** Real leaks the current patterns miss or only catch by accident — Day-3 pattern work, ordered:
+  - **Add PEM private-key block** (`-----BEGIN [A-Z ]*PRIVATE KEY-----`) — `seed-08` (RSA key) gets zero hits and exits as clean. A leaked private key sailing through is a serious miss.
+  - **Add Twilio** (`AC[0-9a-f]{32}` SID + 32-hex auth token) — `seed-10` gets zero hits and exits clean.
+  - **Add GitHub PAT** (`ghp_[A-Za-z0-9]{36}`) — `seed-02` only trips because the `token@github.com` URL looks like an email; a bare `GH_TOKEN=ghp_…` would be missed.
+  - `seed-05` (DB password) and `seed-09` (GCP key) likewise only trip via the `email` fragment — ties to the existing "don't just tighten `email`" note. Formalize dedicated patterns so coverage isn't incidental.
+  - With current patterns, seeded-set recall caps at ~8/10 (seed-08, seed-10 missed). Add these patterns *before* tuning precision, or the recall number is misleading.

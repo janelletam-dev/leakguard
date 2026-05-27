@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><title>can't connect to billing replica</title></head>
+<body>
+<pre>
+psql keeps timing out against the replica. this is the exact DSN our worker uses:
+
+postgres://svc_billing:Rk9$mWp2xQ7nLt4Z@db-prod-02.arrowstride.io:5432/billing?sslmode=require
+
+primary works with the same user/pass. is the replica host wrong or is it a firewall thing?
+</pre>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><title>api returns 403 with this bearer token</title></head>
+<body>
+<pre>
+internal service call keeps getting 403. this is the token the gateway issued:
+
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdmNfODI0NyIsInJvbGUiOiJhZG1pbiIsImlzcyI6ImF1dGguZmVybndvb2QtbGFicy5jb20iLCJpYXQiOjE3MzU2ODAwMDB9.Kx2pLqR9mNwT4yBdHf7sGzJc1eUa5XrQ6oPi3Wv8K
+
+it decodes fine and isnt expired. why would the gateway reject its own token?
+</pre>
+</body>
+</html>

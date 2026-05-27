@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><title>Decoding a JWT — a worked example</title></head>
+<body>
+<pre>
+Here is the standard example token from jwt.io so you can see the three parts:
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+The payload decodes to {"sub":"1234567890","name":"John Doe","iat":1516239022} — a documented
+sample, signed with the secret "your-256-bit-secret". It is not a real credential.
+</pre>
+</body>
+</html>

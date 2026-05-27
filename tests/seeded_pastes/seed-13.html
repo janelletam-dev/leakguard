@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><title>Stripe quickstart — creating your first charge</title></head>
+<body>
+<pre>
+Use your test-mode secret key while developing. You can find it in the Stripe dashboard:
+
+import stripe
+stripe.api_key = "sk_test_4eC39HqLyjWDarjtT1zdp7dc"   # test mode, safe to share in docs
+
+charge = stripe.Charge.create(amount=2000, currency="usd", source="tok_visa")
+
+Switch to your live key (sk_live_...) only in production, loaded from an environment variable.
+</pre>
+</body>
+</html>

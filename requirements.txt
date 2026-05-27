@@ -1,7 +1,9 @@
 langgraph
 anthropic
+langsmith
 requests
 streamlit
 python-dotenv
 pydantic
+pyyaml
 pytest

@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><title>openai calls 401 after redeploy</title></head>
+<body>
+<pre>
+script worked yesterday, now every call 401s. key is set inline for now:
+
+import openai
+openai.api_key = "sk-proj-Xk9mPq2RtZ7wVn4bLcArFhGdJ5eUa1XsQ8oWi3yTfHnMzKp"
+
+resp = openai.chat.completions.create(model="gpt-4o", messages=[{"role":"user","content":"ping"}])
+
+billing is active on the novapeak org account. did the key get deactivated?
+</pre>
+</body>
+</html>
