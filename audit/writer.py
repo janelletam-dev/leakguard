@@ -14,7 +14,7 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-from nodes.alert import scrub_secrets
+from nodes.alert import redact, scrub_secrets
 from state import LeakGuardState
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -45,15 +45,18 @@ def _decision(state: LeakGuardState) -> str:
 
 
 def build_record(state: LeakGuardState) -> dict:
-    """Audit record — pattern NAMES only (never the matched secret); raw_content is never logged."""
+    """Audit record — pattern NAMES + a REDACTED credential snippet; raw_content is never logged."""
     verdict = state.get("judge_verdict") or {}
+    hits = state.get("regex_hits") or []
+    top = hits[0] if hits else {}
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "url": state.get("url"),
         "decision": _decision(state),
         "regex_hit_patterns": sorted(
-            {h.get("pattern") for h in (state.get("regex_hits") or []) if h.get("pattern")}
+            {h.get("pattern") for h in hits if h.get("pattern")}
         ),
+        "redacted_credential": redact(top["match"]) if top.get("match") else None,
         "analyst_flagged": state.get("analyst_flagged"),
         "analyst_reasoning": state.get("analyst_reasoning"),
         "judge_verdict": verdict or None,

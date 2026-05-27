@@ -28,6 +28,7 @@ def test_record_is_valid_json_and_redacted(tmp_path, monkeypatch):
     assert "AKIAZ7K9QW2MX4P1L3VN" not in lines[0]               # (b) no raw credential, anywhere
     assert "Xy7$kQ9mLp2wRtVz" not in lines[0]
     assert rec["regex_hit_patterns"] == ["aws_access_key"]      # pattern NAMES only, not matches
+    assert rec["redacted_credential"] == "[…L3VN, len=20]"      # redacted snippet, not the raw key
     assert rec["decision"] == "verified"
     assert len(rec["prompt_hashes"]["judge_system.md"]) == 8    # (c) prompt version stamped
 
