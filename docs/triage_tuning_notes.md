@@ -18,7 +18,7 @@ Patterns are intentionally left as-is until then.
 
 - **Recall gaps surfaced by the seeded-set triage dry-run (free, pre-Judge).** Real leaks the current patterns miss or only catch by accident — Day-3 pattern work, ordered:
   - **Add PEM private-key block** (`-----BEGIN [A-Z ]*PRIVATE KEY-----`) — `seed-08` (RSA key) gets zero hits and exits as clean. A leaked private key sailing through is a serious miss.
-  - **Add Twilio** (`AC[0-9a-f]{32}` SID + 32-hex auth token) — `seed-10` gets zero hits and exits clean.
+  - **Twilio (`seed-10`) — check the FIXTURE before the regex.** `seed-10` gets zero hits, but its SID isn't valid Twilio format (real = `AC` + 32 **hex**; the fixture used a mixed-case, non-hex, wrong-length string). detect-secrets misses it too — which points at an unrealistic fixture, not a true funnel gap. Thursday: fix the fixture to a real Twilio shape, re-test, *then* decide if an `AC[0-9a-f]{32}` + 32-hex-token pattern is even needed. (Contrast `seed-08`: detect-secrets DOES flag its private key, so that one is a real triage gap — add the PEM pattern.)
   - **Add GitHub PAT** (`ghp_[A-Za-z0-9]{36}`) — `seed-02` only trips because the `token@github.com` URL looks like an email; a bare `GH_TOKEN=ghp_…` would be missed.
   - `seed-05` (DB password) and `seed-09` (GCP key) likewise only trip via the `email` fragment — ties to the existing "don't just tighten `email`" note. Formalize dedicated patterns so coverage isn't incidental.
   - With current patterns, seeded-set recall caps at ~8/10 (seed-08, seed-10 missed). Add these patterns *before* tuning precision, or the recall number is misleading.
