@@ -1,0 +1,10 @@
+# Blocks new secrets from being committed. The baseline records known/audited findings
+# (including the synthetic credentials in mock_server/pastes/), so the hook only fails on
+# NEW secrets not already in the baseline.
+repos:
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: '^\.venv/|^\.env$|^\.secrets\.baseline$'
