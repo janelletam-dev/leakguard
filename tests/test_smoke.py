@@ -6,9 +6,10 @@ from nodes.alert import redact
 from nodes.triage import PATTERNS
 
 
-def test_redact_shows_first_and_last_four():
-    assert redact("AKIAZ7K9QW2MX4P1L3VN") == "AKIA************L3VN"
-    assert redact("short") == "*****"
+def test_redact_masks_head_shows_tail_and_length():
+    assert redact("AKIAZ7K9QW2MX4P1L3VN") == "[…L3VN, len=20]"
+    assert "AKIA" not in redact("AKIAZ7K9QW2MX4P1L3VN")   # fixed prefix never shown
+    assert redact("short") == "[redacted, len=5]"          # too short to reveal a tail
 
 
 def test_aws_pattern_matches_real_but_not_garbage():

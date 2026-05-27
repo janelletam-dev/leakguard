@@ -15,7 +15,8 @@ _STATE = {
 
 def test_payload_redacts_and_includes_fields():
     text = build_payload(_STATE)["text"]
-    assert "AKIA" in text and "L3VN" in text          # redacted form shown
+    assert "L3VN" in text and "len=20" in text        # tail + length shown
+    assert "AKIA" not in text                          # fixed prefix never shown
     assert "AKIAZ7K9QW2MX4P1L3VN" not in text         # full secret never leaves the box
     assert "9/10" in text
     assert "real leak" in text
@@ -70,4 +71,4 @@ def test_reasoning_secrets_are_scrubbed():
     text = build_payload(state)["text"]
     assert "AKIAZ7K9QW2MX4P1L3VN" not in text   # regex-hit secret scrubbed
     assert "Xy7$kQ9mLp2wRtVz" not in text       # high-entropy secret triage missed — also scrubbed
-    assert "AKIA" in text and "Xy7$" in text     # redacted forms still present
+    assert "L3VN" in text and "RtVz" in text     # redacted tails still present

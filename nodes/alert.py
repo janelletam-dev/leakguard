@@ -21,10 +21,13 @@ _SECRETISH = re.compile(r"[A-Za-z0-9$/+_=.\-]{8,}")
 
 
 def redact(secret: str) -> str:
-    """Show first 4 and last 4 chars only (ALRT-03 / NFR-04)."""
-    if len(secret) <= 8:
-        return "*" * len(secret)
-    return f"{secret[:4]}{'*' * (len(secret) - 8)}{secret[-4:]}"
+    """Mask a secret for display (ALRT-03 / NFR-04). Never reveal the head — for many keys it's
+    a fixed prefix (e.g. AKIA) and carries no entropy. Show only a short tail for identifiability
+    plus the length; fully mask anything too short to reveal a tail safely."""
+    n = len(secret)
+    if n < 8:
+        return f"[redacted, len={n}]"
+    return f"[…{secret[-4:]}, len={n}]"
 
 
 def _high_entropy(token: str) -> bool:
