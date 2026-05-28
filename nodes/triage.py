@@ -26,6 +26,11 @@ PATTERNS: dict[str, re.Pattern] = {
     "api_key_kv": re.compile(r"(?i)api_key\s*=\s*\S+"),
     # Personal-identifier watchlist (v0.2): email-like strings (DISC-04 / TRGE-01).
     "email": re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"),
+    # --- Thursday tuning additions (additive — closes recall gaps surfaced by the baseline
+    # eval; each shape is highly specific, so precision should hold at 100%) ---
+    "pem_private_key": re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+    "twilio_sid": re.compile(r"\bAC[0-9a-f]{32}\b"),
+    "github_token": re.compile(r"\bgh[oprsu]_[A-Za-z0-9]{36}\b"),
 }
 
 

@@ -1,9 +1,8 @@
-"""Day-1 triage_node tests. Drives triage off raw_content loaded from the fixtures
-(no server needed — triage is pure regex over state)."""
+"""Triage_node tests. Drives triage off raw_content loaded from fixtures (no server needed)."""
 
 from pathlib import Path
 
-from nodes.triage import triage_node
+from nodes.triage import PATTERNS, triage_node
 
 PASTES = Path(__file__).resolve().parent.parent / "mock_server" / "pastes"
 
@@ -40,3 +39,22 @@ def test_empty_and_none_are_clean():
         triage_node(state)
         assert state["is_triaged_clean"] is True
         assert state["regex_hits"] == []
+
+
+def test_new_thursday_patterns_match_realistic_examples():
+    """PEM private key, Twilio SID, GitHub PAT — additive patterns from the Thursday round."""
+    p = PATTERNS
+    # PEM private key — any literal BEGIN ... PRIVATE KEY header (RSA, EC, OpenSSH, plain).
+    assert p["pem_private_key"].search("-----BEGIN RSA PRIVATE KEY-----\nMII...")
+    assert p["pem_private_key"].search("-----BEGIN PRIVATE KEY-----")
+    assert p["pem_private_key"].search("-----BEGIN OPENSSH PRIVATE KEY-----")
+    assert not p["pem_private_key"].search("-----BEGIN PUBLIC KEY-----")
+    # Twilio Account SID — AC + exactly 32 lowercase hex (uppercase ≠ real Twilio).
+    assert p["twilio_sid"].search("AC8a3f7d2b1e9c6a4d5e0b8f1c2a7e9d4b")
+    assert not p["twilio_sid"].search("ACShortString")
+    assert not p["twilio_sid"].search("AC8A3F7D2B1E9C6A4D5E0B8F1C2A7E9D4B")  # uppercase rejected
+    # GitHub token (PAT / OAuth / server) — gh{p,o,s,u,r}_ + 36 alphanumerics.
+    assert p["github_token"].search("ghp_abcd1234efgh5678ijkl9012mnop3456qrst")
+    assert p["github_token"].search("gho_abcd1234efgh5678ijkl9012mnop3456qrst")
+    assert not p["github_token"].search("ghp_short")
+    assert not p["github_token"].search("foo_abcd1234efgh5678ijkl9012mnop3456qrst")
