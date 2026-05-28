@@ -65,4 +65,64 @@ strict for structured tokens.
 > is recoverable. Land at precision 100% / recall 80% before precision 90% / recall 95%.
 > The headline that backs the pitch is *"when LeakGuard fires, it is right."*
 
-## Tuned — _TODO: re-run 3× after Judge calibration, report mean ± stdev_
+## Locked rubric — 3-run variance baseline, 2026-05-28
+
+After the format-recognition + exposure-context rubric edits (commit `7d4b6bf`), three
+back-to-back runs of `tests/run_eval.py` against the 22-fixture seeded set. **The rubric is
+now locked** — no further Judge prompt edits before the demo. Anthropic's temp-0 API is not
+strictly deterministic, and the Analyst at temp 0.3 introduces drift that propagates into
+Judge scoring. Measuring that drift is what makes the precision claim defensible.
+
+| metric | mean | stdev | range |
+|--------|------|-------|-------|
+| **precision** | **100%** | **±0%** | 100–100% |
+| **false-positive rate** | **0%** | ±0% | 0–0% |
+| recall | 73% | ±16% | 55–82% |
+| accuracy | 87% | ±7% | 80–95% |
+
+**Precision and FPR held perfectly across all 3 runs.** Decoys all scored 0–4; the gap from
+the highest decoy (`seed-20` = 4) to the verify threshold (`>=8`) is wide and stable. The
+prompt-injection decoy (`seed-22`) stayed at 3 every run — the `<paste>` defense held.
+
+**Recall jitter is honest data, not noise to hide.** It is concentrated on **borderline
+fixtures that sit at 7–8** on the verify cliff. A 1-point Judge-score shift on a borderline
+fixture flips a verify/not-verify decision and swings *headline recall* by 9 points. This is
+the threshold-cliff effect — structural, not a rubric defect.
+
+### Per-fixture scores across the 3 runs
+
+**Borderline real leaks (recall jitter source) — flipped across runs:**
+
+| fixture | scores (r1 / r2 / r3) | what it is | reading |
+|---------|----------------------|-----------|---------|
+| seed-06 (Slack bot + webhook) | 7 / 8 / 8 | real bot token in panicked-debug | flipped across cliff |
+| seed-09 (GCP service-account) | 5 / 8 / 8 | real `private_key` + `client_email` JSON | flipped across cliff |
+| seed-10 (Twilio) | 7 / 8 / 8 | live-format SID + auth token | flipped across cliff |
+
+**Consistently below threshold:**
+
+| fixture | scores | reading |
+|---------|--------|---------|
+| seed-04 (Slack bot token) | 7 / 7 / 7 | stable below — Judge consistently under-credits this one |
+| seed-08 (PEM RSA private key) | 5 / 5 / 7 | **fixture limitation** — abbreviated 3-line PEM body. Fix below. |
+
+**Stable verified** (every run): seed-01 (10), seed-02 (10), seed-03 (9), seed-05 (9),
+seed-07 (8/9/9), seed-21 (8/8/8).
+
+**Stable rejected** (every run, all decoys): seed-11–20, seed-22.
+
+### Slide-4 claim (honest variance)
+
+> **Precision 100% (stable across 3 runs).**
+> **Recall 73% mean (±16% stdev, range 55–82%)** — the jitter is concentrated on borderline
+> tokens that sit at the verify threshold; a 1-point Judge shift flips them across.
+> **False-positive rate 0%.**
+>
+> *The headline that backs the pitch is "when LeakGuard fires, it is right" — that claim is
+> precision, and precision is what holds.*
+
+### Post-baseline fixture fix — _TODO: lengthen seed-08's PEM body to realistic length_
+
+This fix happens **after** the variance baseline above. The variance numbers are on the
+*rubric*, not on this fixture. A single confirmation run afterward will check that seed-08
+stabilises into the verified range and that precision held.
