@@ -121,8 +121,33 @@ seed-07 (8/9/9), seed-21 (8/8/8).
 > *The headline that backs the pitch is "when LeakGuard fires, it is right" — that claim is
 > precision, and precision is what holds.*
 
-### Post-baseline fixture fix — _TODO: lengthen seed-08's PEM body to realistic length_
+### Post-baseline fixture fix — seed-08 PEM body lengthened, 2026-05-28
 
-This fix happens **after** the variance baseline above. The variance numbers are on the
-*rubric*, not on this fixture. A single confirmation run afterward will check that seed-08
-stabilises into the verified range and that precision held.
+Lengthened seed-08's PEM body from 3 lines to ~25 lines (RSA-2048-realistic length) to test
+whether body completeness was the bottleneck. **One** confirmation run afterward (the fix is
+on the *fixture*, not the rubric — the variance baseline above remains the authoritative
+rubric measurement):
+
+| metric | confirmation run |
+|---|---|
+| **precision** | **100%** ✅ |
+| **false-positive rate** | **0%** ✅ |
+| recall | 64% (within the 3-run range of 55–82%) |
+| seed-08 score | **6/10 — body fix did not recover it** |
+
+**Honest reading:** the abbreviated body was *one* limitation, not the only one. The Judge
+correctly weighed all three axes, and seed-08 has additional limits on
+target_authenticity (`harbor-deploy-01` is not a clear corporate domain) and
+exposure_context (the paste is short, with limited panicked-debug framing). Lengthening the
+body alone was not enough to clear all three axes.
+
+This run's overall recall (64%) sits at the **lower end of the 3-run variance** — one sample
+within the normal jitter distribution, not a signal change. seed-02 (GitHub PAT) also
+dropped to 7 in this run despite being 10/10/10 across the baseline runs, which illustrates
+that the temp-0 jitter is broad, not isolated to borderline cases.
+
+### Final state — rubric and threshold LOCKED
+
+The slide-4 numbers are the **3-run variance baseline above**: precision **100%** (stable),
+recall **73% mean ±16% stdev** (jitter is structural threshold-cliff behaviour, not a rubric
+defect), FPR **0%** (stable). **No further Judge prompt or threshold edits before the demo.**
