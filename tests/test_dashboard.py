@@ -30,3 +30,20 @@ def test_load_records_tolerates_partial_last_line(tmp_path):
                  encoding="utf-8")
     recs = load_records(p)
     assert len(recs) == 1 and recs[0]["url"] == "ok"  # half-written tail skipped, no crash
+
+
+def test_load_records_falls_back_to_demo_snapshot(tmp_path, monkeypatch):
+    """Deploy path: real log absent → dashboard reads the committed demo snapshot."""
+    from dashboard import stats
+
+    fake_real = tmp_path / "missing_audit_log.jsonl"
+    fake_demo = tmp_path / "demo_audit_log.jsonl"
+    fake_demo.write_text(
+        json.dumps({"url": "snap", "decision": "verified"}) + "\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(stats, "AUDIT_LOG", fake_real)
+    monkeypatch.setattr(stats, "DEMO_AUDIT_LOG", fake_demo)
+
+    assert stats.is_demo_mode() is True
+    recs = stats.load_records()
+    assert len(recs) == 1 and recs[0]["url"] == "snap"

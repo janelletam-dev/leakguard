@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import streamlit as st
 from dotenv import load_dotenv
 
-from dashboard.stats import load_records, summarize, verified_leaks
+from dashboard.stats import is_demo_mode, load_records, summarize, verified_leaks
 
 REFRESH_SECONDS = 5
 
@@ -82,6 +82,16 @@ st.markdown(
         margin-top: 10px;
         color: #202124;
       }
+      .lg-demo-banner {
+        background: #fff7e6;
+        border-left: 4px solid #f59e0b;
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin-bottom: 14px;
+        color: #5b4209;
+        font-size: 0.92rem;
+      }
+      .lg-demo-banner strong { color: #92400e; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -95,6 +105,19 @@ st.markdown(
     "</div>",
     unsafe_allow_html=True,
 )
+
+# Honest disclosure when this dashboard is the Streamlit Cloud deploy reading the
+# committed snapshot — the agent does not run live there, and we say so on the page.
+if is_demo_mode():
+    st.markdown(
+        '<div class="lg-demo-banner">'
+        "<strong>Demo snapshot.</strong> Captured from a real LeakGuard run. "
+        "The agent does not run live on this hosted instance — visiting this "
+        "page does not consume Bright Data credits. To run the pipeline against "
+        "live targets, clone the repo and run it locally."
+        "</div>",
+        unsafe_allow_html=True,
+    )
 
 records = load_records()
 s = summarize(records)
